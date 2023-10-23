@@ -30,6 +30,7 @@ enum state{
   NoState,
   Idle,
   List,
+  test
 };
 
 enum Triggers{
