@@ -1,9 +1,9 @@
 src/stm32f4_discovery.o: ..\src\stm32f4_discovery.c \
-  D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\Pre_Include_Global.h \
+  C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\Pre_Include_Global.h \
   ..\src\stm32f4_discovery.h \
   C:\Users\jonat\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h \
   C:\Users\jonat\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.1\MDK\Templates\Inc\stm32f4xx_hal_conf.h \
-  D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\RTE_Components.h \
+  C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\RTE_Components.h \
   C:\Users\jonat\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_rcc.h \
   C:\Users\jonat\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_def.h \
   C:\Users\jonat\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h \
@@ -34,11 +34,11 @@ src/stm32f4_discovery.o: ..\src\stm32f4_discovery.c \
   C:\Users\jonat\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_pwr_ex.h \
   C:\Users\jonat\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_spi.h \
   C:\Users\jonat\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_usart.h
-D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\Pre_Include_Global.h:
+C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\Pre_Include_Global.h:
 ..\src\stm32f4_discovery.h:
 C:\Users\jonat\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h:
 C:\Users\jonat\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.1\MDK\Templates\Inc\stm32f4xx_hal_conf.h:
-D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\RTE_Components.h:
+C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\RTE_Components.h:
 C:\Users\jonat\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_rcc.h:
 C:\Users\jonat\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_def.h:
 C:\Users\jonat\AppData\Local\Arm\Packs\Keil\STM32F4xx_DFP\2.17.1\Drivers\CMSIS\Device\ST\STM32F4xx\Include\stm32f4xx.h:

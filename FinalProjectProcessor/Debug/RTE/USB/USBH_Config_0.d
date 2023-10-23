@@ -1,7 +1,7 @@
 RTE/USB/USBH_Config_0.o: ..\RTE\USB\USBH_Config_0.c \
-  D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\Pre_Include_Global.h \
-  D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\RTE_Components.h \
-  D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\USB\USBH_Config_MSC.h \
+  C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\Pre_Include_Global.h \
+  C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\RTE_Components.h \
+  C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\USB\USBH_Config_MSC.h \
   C:\Users\jonat\AppData\Local\Arm\Packs\Keil\MDK-Middleware\7.16.0\USB\Include\usbh_config.h \
   D:\Software\Arms\sw\ARMCompiler6.20\bin\..\include\stdint.h \
   D:\Software\Arms\sw\ARMCompiler6.20\bin\..\include\stdbool.h \
@@ -28,9 +28,9 @@ RTE/USB/USBH_Config_0.o: ..\RTE\USB\USBH_Config_0.c \
   C:\Users\jonat\AppData\Local\Arm\Packs\Keil\MDK-Middleware\7.16.0\USB\Include\usbh_config_def_0.h \
   C:\Users\jonat\AppData\Local\Arm\Packs\Keil\MDK-Middleware\7.16.0\USB\Include\usbh_config_hc_0.c \
   C:\Users\jonat\AppData\Local\Arm\Packs\Keil\MDK-Middleware\7.16.0\USB\Include\usbh_cmsis_rtos1.c
-D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\Pre_Include_Global.h:
-D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\RTE_Components.h:
-D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\USB\USBH_Config_MSC.h:
+C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\Pre_Include_Global.h:
+C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\RTE_Components.h:
+C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\USB\USBH_Config_MSC.h:
 C:\Users\jonat\AppData\Local\Arm\Packs\Keil\MDK-Middleware\7.16.0\USB\Include\usbh_config.h:
 D:\Software\Arms\sw\ARMCompiler6.20\bin\..\include\stdint.h:
 D:\Software\Arms\sw\ARMCompiler6.20\bin\..\include\stdbool.h:

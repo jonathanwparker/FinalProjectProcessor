@@ -1,7 +1,7 @@
 RTE/File_System/FS_Config.o: ..\RTE\File_System\FS_Config.c \
-  D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\Pre_Include_Global.h \
-  D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\RTE_Components.h \
-  D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\File_System\FS_Config_USB_0.h \
+  C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\Pre_Include_Global.h \
+  C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\RTE_Components.h \
+  C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\File_System\FS_Config_USB_0.h \
   C:\Users\jonat\AppData\Local\Arm\Packs\Keil\MDK-Middleware\7.16.0\FileSystem\Include\fs_config.h \
   D:\Software\Arms\sw\ARMCompiler6.20\bin\..\include\string.h \
   D:\Software\Arms\sw\ARMCompiler6.20\bin\..\include\rt_sys.h \
@@ -16,9 +16,9 @@ RTE/File_System/FS_Config.o: ..\RTE\File_System\FS_Config.c \
   C:\Users\jonat\AppData\Local\Arm\Packs\ARM\CMSIS\5.9.0\CMSIS\RTOS\RTX\INC\cmsis_os.h \
   D:\Software\Arms\sw\ARMCompiler6.20\bin\..\include\stddef.h \
   D:\Software\Arms\sw\ARMCompiler6.20\bin\..\include\stdio.h
-D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\Pre_Include_Global.h:
-D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\RTE_Components.h:
-D:\Software\Cadence_Work\git\FinalProjectProces\FinalProjectProcessor\RTE\File_System\FS_Config_USB_0.h:
+C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\Pre_Include_Global.h:
+C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\RTE_Components.h:
+C:\Users\jonat\Development\ Studio\ Workspace\Lab_11\RTE\File_System\FS_Config_USB_0.h:
 C:\Users\jonat\AppData\Local\Arm\Packs\Keil\MDK-Middleware\7.16.0\FileSystem\Include\fs_config.h:
 D:\Software\Arms\sw\ARMCompiler6.20\bin\..\include\string.h:
 D:\Software\Arms\sw\ARMCompiler6.20\bin\..\include\rt_sys.h:
