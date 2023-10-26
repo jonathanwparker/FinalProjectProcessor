@@ -12,6 +12,8 @@
 #include "arm_math.h"
 #include <stdio.h>
 
+//HI TERRY HOW IT GOING???
+
 #define LED_Green   0
 #define LED_Orange  1
 #define LED_Red     2
