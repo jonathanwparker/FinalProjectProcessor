@@ -28,13 +28,13 @@ enum Blue_Blink_Commands{
 // State Machine definitions
 enum state{
   NoState,
-  Idle,
-  List,
-  test
+  Init,
+  Idle
 };
 
 enum Triggers{
   Show_Files,
+  Files_Indexed,
   End_Stream
 
 };
@@ -42,6 +42,12 @@ enum Triggers{
 enum Buffers{
   Buffer1,
   Buffer2
+
+};
+
+enum Actions{
+	NoAction,
+	List
 
 };
 
@@ -99,41 +105,28 @@ osThreadId tid_RX_Command;  // thread id
 osThreadDef (Rx_Command, osPriorityNormal, 1, 0); // thread object
                  // thread object
 
-void Process_Event(uint16_t event){
+int Process_Event(uint16_t event){
   osEvent evt;
   static uint16_t   Current_State = NoState; // Current state of the SM
   switch(Current_State){
     case NoState:
       // Next State
-      Current_State = Idle;
-      // Exit actions
-      // Transition actions
-      // State1 entry actions
-      LED_On(LED_Red);
+      Current_State = Init;
     
       break;
-    case Idle:
-      if(event == Show_Files){
-        Current_State = List;
-        // Exit actions
-        LED_Off(LED_Red);
-        // Transition actions
-        // State2 entry actions
-        LED_On(LED_Green);
-        osMessagePut (mid_list_files, 1, osWaitForever);
+    case Init:
+      if(event == Files_Indexed){
+        Current_State = Idle;
+        return NoAction;
       }
       break;
-    case List:
-      if(event == End_Stream){
-        Current_State = Idle;
-        // Exit actions
-        LED_Off(LED_Green);
-        LED_On(LED_Red);
-      }
+    case Idle:
+      return NoAction;
       break;
     default:
       break;
   } // end case(Current_State)
+  return NoAction;
 } // Process_Event
 
 
@@ -165,6 +158,10 @@ void Control(void const *arg){
    while(1){
     evt = osMessageGet (mid_CMDQueue, osWaitForever); // receive command
       if (evt.status == osEventMessage) { // check for valid message
+    	  if(evt.value.v==Show_Files){
+    		  osMessagePut(mid_list_files,List,osWaitForever);
+
+    	  }
       Process_Event(evt.value.v); // Process event
     }
    }
