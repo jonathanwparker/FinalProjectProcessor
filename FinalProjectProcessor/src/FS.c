@@ -155,14 +155,16 @@ void Init_Thread (void) {
 void Control(void const *arg){
   osEvent evt; // Receive message object
   Process_Event(0); // Initialize the State Machine
+  int action;
    while(1){
     evt = osMessageGet (mid_CMDQueue, osWaitForever); // receive command
       if (evt.status == osEventMessage) { // check for valid message
     	  if(evt.value.v==Show_Files){
     		  osMessagePut(mid_list_files,List,osWaitForever);
-
     	  }
-      Process_Event(evt.value.v); // Process event
+    	  else {
+    	      action = Process_Event(evt.value.v); // Process event
+    	  }
     }
    }
 }
@@ -201,12 +203,14 @@ void FS (void const *argument) {
 	usbStatus ustatus; // USB driver status variable
 			uint8_t drivenum = 0; // Using U0: drive number
 			char *drive_name = "U0:"; // USB drive name
+			fsFileInfo info;
 			fsStatus fstatus; // file system status variable
 			WAVHEADER header;
 			size_t rd;
 			uint32_t i;
 			static uint8_t rtrn = 0;
 			uint8_t rdnum = 1; // read buffer number
+			osEvent evt;
 
 			uint32_t Fs = 8000.0; // sample frequency
 
@@ -214,28 +218,41 @@ void FS (void const *argument) {
 			static FILE *f;
 
 			ustatus = USBH_Initialize (drivenum); // initialize the USB Host
-						if (ustatus == usbOK){
-							// loop until the device is OK, may be delay from Initialize
-							ustatus = USBH_Device_GetStatus (drivenum); // get the status of the USB device
-							while(ustatus != usbOK){
-								ustatus = USBH_Device_GetStatus (drivenum); // get the status of the USB device
-							}
-							// initialize the drive
-							fstatus = finit (drive_name);
-							if (fstatus != fsOK){
-								// handle the error, finit didn't work
-							} // end if
-							// Mount the drive
-							fstatus = fmount (drive_name);
-							if (fstatus != fsOK){
-								// handle the error, fmount didn't work
-							} // end if
-							// file system and drive are good to go
-							f = fopen ("Kalimba.wav","r");// open a file on the USB device
-							if (f != NULL) {
-								fread((void *)&header, sizeof(header), 1, f);
-							} // end if file opened
-						} // end if USBH_Initialize
+			if (ustatus == usbOK){
+				// loop until the device is OK, may be delay from Initialize
+				ustatus = USBH_Device_GetStatus (drivenum); // get the status of the USB device
+				while(ustatus != usbOK){
+					ustatus = USBH_Device_GetStatus (drivenum); // get the status of the USB device
+				}
+				// initialize the drive
+				fstatus = finit (drive_name);
+				if (fstatus != fsOK){
+					// handle the error, finit didn't work
+				} // end if
+				// Mount the drive
+				fstatus = fmount (drive_name);
+				if (fstatus != fsOK){
+					// handle the error, fmount didn't work
+				} // end if
+				// file system and drive are good to go
+				f = fopen ("Kalimba.wav","r");// open a file on the USB device
+				if (f != NULL) {
+					fread((void *)&header, sizeof(header), 1, f);
+				} // end if file opened
+			} // end if USBH_Initialize
+
+			while(evt.value.v!=List){
+				evt = osMessageGet(mid_list_files,osWaitForever);
+			}
+			info.fileID = 0;
+			UART_send(StartFileList_msg,2); // Send start string
+			while(ffind("*.wav",&info)==fsOK){
+				UART_send(info.name, strlen(info.name));
+				UART_send("\n",1); // this is the VB string terminator "\n"
+			}
+			UART_send(EndFileList_msg,2); // Send start string
+			osMessagePut (mid_CMDQueue, End_Stream, osWaitForever);
+
 
 
 	tmp = 6.28f*freq/Fs; // only calc this factor once
