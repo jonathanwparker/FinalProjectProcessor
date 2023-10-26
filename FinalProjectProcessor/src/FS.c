@@ -28,27 +28,20 @@ enum Blue_Blink_Commands{
 // State Machine definitions
 enum state{
   NoState,
-  Init,
   Idle,
+  List,
   test
 };
 
 enum Triggers{
-  Files_Indexed,
-  List_Files,
-  Ret_State
+  Show_Files,
+  End_Stream
 
 };
 
 enum Buffers{
   Buffer1,
   Buffer2
-
-};
-
-enum actions{
-	NoAction,
-	List
 
 };
 
@@ -106,37 +99,42 @@ osThreadId tid_RX_Command;  // thread id
 osThreadDef (Rx_Command, osPriorityNormal, 1, 0); // thread object
                  // thread object
 
-int Process_Event(uint16_t event){
+void Process_Event(uint16_t event){
   osEvent evt;
   static uint16_t   Current_State = NoState; // Current state of the SM
   switch(Current_State){
     case NoState:
       // Next State
-      Current_State = Init;
-
-      break;
-    case Init:
-    	if(event == Files_Indexed){
-    		Current_State = Idle;
-    		return NoAction;
-    	}
-    	else if(event==Ret_State){
-    		return Current_State;
-    	}
-
+      Current_State = Idle;
+      // Exit actions
+      // Transition actions
+      // State1 entry actions
+      LED_On(LED_Red);
+    
       break;
     case Idle:
-      return NoAction;
+      if(event == Show_Files){
+        Current_State = List;
+        // Exit actions
+        LED_Off(LED_Red);
+        // Transition actions
+        // State2 entry actions
+        LED_On(LED_Green);
+        osMessagePut (mid_list_files, 1, osWaitForever);
+      }
+      break;
+    case List:
+      if(event == End_Stream){
+        Current_State = Idle;
+        // Exit actions
+        LED_Off(LED_Green);
+        LED_On(LED_Red);
+      }
       break;
     default:
       break;
   } // end case(Current_State)
-  return NoAction;
 } // Process_Event
-
-int CurrentState(){
-	return Process_Event(Ret_State);
-}
 
 
 void Init_Thread (void) {
@@ -167,14 +165,7 @@ void Control(void const *arg){
    while(1){
     evt = osMessageGet (mid_CMDQueue, osWaitForever); // receive command
       if (evt.status == osEventMessage) { // check for valid message
-    	  if(evt.value.v==List_Files){
-    		if(CurrentState()==Init){
-    			osMessagePut(mid_list_files,List,osWaitForever);
-    		}
-    	  }
-    	  else{
-    	      Process_Event(evt.value.v); // Process event
-    	  }
+      Process_Event(evt.value.v); // Process event
     }
    }
 }
@@ -187,14 +178,15 @@ void Rx_Command (void const *argument){
       UART_receive(rx_char, 1); // Wait for command from PC GUI
     // Check for the type of character received
       if(!strcmp(rx_char,Show_Files_char)){
-         osMessagePut(mid_CMDQueue, List_Files, osWaitForever);
-         }
+         // Trigger1 received
+         osMessagePut (mid_CMDQueue, Show_Files, osWaitForever);
       }
       if(!strcmp(rx_char,Send_File_char)){
     	  UART_receivestring(name,256);
     	  i=1;
       }
    }
+} // end Rx_Command
 
 #define NUM_CHAN	2 // number of audio channels
 #define NUM_POINTS 1024 // number of points per channel
@@ -214,13 +206,10 @@ void FS (void const *argument) {
 			char *drive_name = "U0:"; // USB drive name
 			fsStatus fstatus; // file system status variable
 			WAVHEADER header;
-			fsFileInfo info;
 			size_t rd;
 			uint32_t i;
 			static uint8_t rtrn = 0;
 			uint8_t rdnum = 1; // read buffer number
-			osEvent evt;
-			int res;
 
 			uint32_t Fs = 8000.0; // sample frequency
 
@@ -228,40 +217,28 @@ void FS (void const *argument) {
 			static FILE *f;
 
 			ustatus = USBH_Initialize (drivenum); // initialize the USB Host
-			if (ustatus == usbOK){
-				// loop until the device is OK, may be delay from Initialize
-				ustatus = USBH_Device_GetStatus (drivenum); // get the status of the USB device
-				while(ustatus != usbOK){
-					ustatus = USBH_Device_GetStatus (drivenum); // get the status of the USB device
-				}
-				// initialize the drive
-				fstatus = finit (drive_name);
-				if (fstatus != fsOK){
-					// handle the error, finit didn't work
-				} // end if
-				// Mount the drive
-				fstatus = fmount (drive_name);
-				if (fstatus != fsOK){
-					// handle the error, fmount didn't work
-				} // end i
-			} // end if USBH_Initialize
-
-			while(evt.value.v!=List){
-				evt = osMessageGet (mid_list_files, osWaitForever);
-				if (evt.status == osEventMessage) { // check for valid message
-				    	  if(evt.value.v==List){
-				    		res=evt.value.v;
-				    	  }
-				    }
-			}
-			info.fileID = 0;
-			UART_send(StartFileList_msg,2); // Send start string
-			while(ffind("*.wav",&info)==fsOK){
-				UART_send(info.name, strlen(info.name));
-				UART_send("\n",1); // this is the VB string terminator "\n"
-			}
-			UART_send(EndFileList_msg,2); // Send start string
-			osMessagePut (mid_CMDQueue, Files_Indexed, osWaitForever);
+						if (ustatus == usbOK){
+							// loop until the device is OK, may be delay from Initialize
+							ustatus = USBH_Device_GetStatus (drivenum); // get the status of the USB device
+							while(ustatus != usbOK){
+								ustatus = USBH_Device_GetStatus (drivenum); // get the status of the USB device
+							}
+							// initialize the drive
+							fstatus = finit (drive_name);
+							if (fstatus != fsOK){
+								// handle the error, finit didn't work
+							} // end if
+							// Mount the drive
+							fstatus = fmount (drive_name);
+							if (fstatus != fsOK){
+								// handle the error, fmount didn't work
+							} // end if
+							// file system and drive are good to go
+							f = fopen ("Kalimba.wav","r");// open a file on the USB device
+							if (f != NULL) {
+								fread((void *)&header, sizeof(header), 1, f);
+							} // end if file opened
+						} // end if USBH_Initialize
 
 
 	tmp = 6.28f*freq/Fs; // only calc this factor once

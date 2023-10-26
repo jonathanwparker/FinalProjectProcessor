@@ -324,7 +324,7 @@
 	<storageModule moduleId="com.arm.projectSettings" version="6.0.0"/>
 	<storageModule moduleId="refreshScope"/>
 	<storageModule moduleId="com.arm.cmsis.project">
-		<rteConfig name="FinalProjectProcessor.rteconfig"/>
+		<rteConfig name="Lab_11.rteconfig"/>
 		<toolChainAdapter id="com.arm.cmsis.pack.build.armcc5.Armcc5ToolChainAdapter" name="Adapter for ARM C/C++ 5.x and 6.x toolchains"/>
 		<device Dclock="168000000" Dcore="Cortex-M4" DcoreVersion="r0p1" Dendian="Little-endian" Dfamily="STM32F4 Series" Dfpu="SP_FPU" Dmpu="MPU" Dname="STM32F407VG" DsubFamily="STM32F407" Dvariant="STM32F407VGTx" Dvendor="STMicroelectronics:13" info="ARM , 192 KB RAM, 1 MB ROM" url="https://www.keil.com/dd2/st/stm32f407vgtx"/>
 		<files>

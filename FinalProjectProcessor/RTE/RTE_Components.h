@@ -2,8 +2,8 @@
  * Auto generated Run-Time-Environment Component Configuration File
  *      *** Do not modify ! ***
  *
- * Project: FinalProjectProcessor
- * RTE configuration: FinalProjectProcessor.rteconfig
+ * Project: Lab_11
+ * RTE configuration: Lab_11.rteconfig
 */
 #ifndef RTE_COMPONENTS_H
 #define RTE_COMPONENTS_H
