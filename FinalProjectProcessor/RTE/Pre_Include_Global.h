@@ -2,8 +2,8 @@
  * Auto generated Run-Time-Environment Component Configuration File
  *      *** Do not modify ! ***
  *
- * Project: Lab_11
- * RTE configuration: Lab_11.rteconfig
+ * Project: FinalProjectProcessor
+ * RTE configuration: FinalProjectProcessor.rteconfig
 */
 #ifndef PRE_INCLUDE_GLOBAL_H
 #define PRE_INCLUDE_GLOBAL_H
