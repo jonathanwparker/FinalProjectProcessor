@@ -31,7 +31,9 @@ enum Blue_Blink_Commands{
 enum state{
   NoState,
   Init,
-  Idle
+  Idle,
+  Play,
+  Pause
 };
 
 enum Triggers{
@@ -49,7 +51,10 @@ enum Buffers{
 
 enum Actions{
 	NoAction,
-	List
+	List,
+	PlayAction,
+	PauseAction,
+	ResumeAction
 
 };
 
@@ -73,8 +78,12 @@ typedef struct WAVHEADER {
 // Receive characters from the VB GUI 
 #define Show_Files_char "1"
 #define Send_File_char "4"
+#define Play_File_char "5"
+#define Pause_File_char "6"
+#define Stop_File_char "7"
 char *StartFileList_msg = "2\n";
 char *EndFileList_msg = "3\n";
+char *Slide_num = "1\n";
 
 osSemaphoreDef (SEM0);
 osSemaphoreId  (SEM0_ID);
@@ -99,7 +108,8 @@ osMessageQDef (list_files_queue, 1, uint32_t); // message queue object
 osMessageQId mid_buffer_queue; // message queue for commands to Thread
 osMessageQDef (buffer_queue, 1, uint32_t); // message queue object
 
-
+osMessageQId mid_fs; // message queue for commands to Thread
+osMessageQDef (fs, 1, uint32_t); // message queue object
 
 // UART receive thread
 void Rx_Command (void const *argument);  // thread function
@@ -141,6 +151,8 @@ void Init_Thread (void) {
   if (!mid_list_files)return; // Message Queue object not created, handle failure
   mid_buffer_queue = osMessageCreate (osMessageQ(buffer_queue), NULL);  // create msg queue
     if (!mid_buffer_queue)return; // Message Queue object not created, handle failure
+  mid_fs = osMessageCreate (osMessageQ(fs), NULL);  // create msg queue
+	if (!mid_fs)return; // Message Queue object not created, handle failure
 
   SEM0_ID = osSemaphoreCreate(osSemaphore(SEM0), 0);
 
@@ -214,7 +226,7 @@ void FS (void const *argument) {
 			uint8_t rdnum = 1; // read buffer number
 			osEvent evt;
 
-			uint32_t Fs = 8000.0; // sample frequency
+			uint32_t Fs = 44100.0; // sample frequency
 
 
 			static FILE *f;
@@ -258,7 +270,6 @@ void FS (void const *argument) {
 
 
 	tmp = 6.28f*freq/Fs; // only calc this factor once
-	Fs = header.sample_rate;
 	// initialize the audio output
 	rtrn = BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 0x46, Fs);
 	if (rtrn != AUDIO_OK)return;
@@ -273,7 +284,28 @@ void FS (void const *argument) {
   		Audio_Buffer2[2*i+1] = Audio_Buffer2[2*i]; // Right channel
 	osMessagePut (mid_buffer_queue, Buffer2,osWaitForever);
   int BuffNum=1;
-  endStream = 0;
+  endStream = 1;
+  while(1){
+	  evt = osMessageGet(mid_fs,osWaitForever);
+	  evt = osMessageGet (mid_CMDQueue, osWaitForever); // receive command
+	        if (evt.status == osEventMessage) { // check for valid message
+	        	switch(evt.value.v){
+	        	case PlayAction:
+
+	        	case ResumeAction:
+	        		if(evt.value.v==ResumeAction){
+
+	        		}
+
+	        		}
+
+
+
+	        	}
+	      	  }
+
+
+  }
   	while(endStream==0){
   		osSemaphoreWait(SEM0_ID, osWaitForever);
   		if(BuffNum==2){
