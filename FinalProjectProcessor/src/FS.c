@@ -39,7 +39,9 @@ enum state{
 enum Triggers{
   Show_Files,
   Files_Indexed,
-  End_Stream
+  End_Stream,
+  Play_Pressed,
+  Resume_Pressed
 
 };
 
@@ -54,7 +56,8 @@ enum Actions{
 	List,
 	PlayAction,
 	PauseAction,
-	ResumeAction
+	ResumeAction,
+	SongEndAction
 
 };
 
@@ -133,7 +136,23 @@ int Process_Event(uint16_t event){
       }
       break;
     case Idle:
+	  if(event == Play_Pressed){
+		  Current_State = Play;
+		  return PlayAction;
+	  }
+	  else if(event == Resume_Pressed){
+		  return NoAction;
+	  }
       return NoAction;
+      break;
+    case Play:
+      if(event==End_Stream){
+    	  return SongEndAction;
+      }
+      else{
+    	return NoAction;
+      }
+
       break;
     default:
       break;
@@ -178,6 +197,9 @@ void Control(void const *arg){
     	  }
     	  else {
     	      action = Process_Event(evt.value.v); // Process event
+    	      if(action==PlayAction){
+
+    	      }
     	  }
     }
    }
@@ -271,7 +293,7 @@ void FS (void const *argument) {
 
 	tmp = 6.28f*freq/Fs; // only calc this factor once
 	// initialize the audio output
-	rtrn = BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 0x46, Fs);
+	rtrn = BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 0x46, 44100);
 	if (rtrn != AUDIO_OK)return;
 
 	// generate data for the audio buffer
@@ -291,6 +313,10 @@ void FS (void const *argument) {
 	        if (evt.status == osEventMessage) { // check for valid message
 	        	switch(evt.value.v){
 	        	case PlayAction:
+	        		f = fopen ("Kalimba.wav","r");// open a file on the USB device
+					if (f != NULL) {
+						fread((void *)&header, sizeof(header), 1, f);
+					}
 
 	        	case ResumeAction:
 	        		if(evt.value.v==ResumeAction){
