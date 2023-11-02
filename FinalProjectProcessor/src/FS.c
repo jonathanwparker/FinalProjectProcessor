@@ -11,6 +11,7 @@
 #include "math.h"
 #include "arm_math.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 //HI TERRY HOW IT GOING???
 
@@ -86,7 +87,10 @@ typedef struct WAVHEADER {
 #define Stop_File_char "7"
 char *StartFileList_msg = "2\n";
 char *EndFileList_msg = "3\n";
+char *StartFileData_msg = "4\n";
+char *EndFileData_msg = "5\n";
 char *Slide_num = "1\n";
+char name[256];
 
 osSemaphoreDef (SEM0);
 osSemaphoreId  (SEM0_ID);
@@ -198,7 +202,7 @@ void Control(void const *arg){
     	  else {
     	      action = Process_Event(evt.value.v); // Process event
     	      if(action==PlayAction){
-
+    	    	  osMessagePut(mid_fs,action,osWaitForever);
     	      }
     	  }
     }
@@ -207,7 +211,6 @@ void Control(void const *arg){
 
 void Rx_Command (void const *argument){
    char rx_char[2]={0,0};
-   char name[256];
    int i=0;
    while(1){
       UART_receive(rx_char, 1); // Wait for command from PC GUI
@@ -218,7 +221,7 @@ void Rx_Command (void const *argument){
       }
       if(!strcmp(rx_char,Send_File_char)){
     	  UART_receivestring(name,256);
-    	  i=1;
+    	  osMessagePut(mid_CMDQueue, Play_Pressed,osWaitForever);
       }
    }
 } // end Rx_Command
@@ -233,12 +236,15 @@ float32_t cnt = 0.0f; // time index
 float32_t freq = 200.0; // signal frequency in Hz
 float32_t tmp; // factor
 int endStream = 0;
+int num=0;
 
 void FS (void const *argument) {
 	int totalCount = 1;
 	usbStatus ustatus; // USB driver status variable
 			uint8_t drivenum = 0; // Using U0: drive number
 			char *drive_name = "U0:"; // USB drive name
+			char *file_len;
+			char *sampleRate;
 			fsFileInfo info;
 			fsStatus fstatus; // file system status variable
 			WAVHEADER header;
@@ -305,22 +311,54 @@ void FS (void const *argument) {
   fread(&Audio_Buffer2[2*i],sizeof(Audio_Buffer2),1,f); // Left channel
   		Audio_Buffer2[2*i+1] = Audio_Buffer2[2*i]; // Right channel
 	osMessagePut (mid_buffer_queue, Buffer2,osWaitForever);
-  int BuffNum=1;
-  endStream = 1;
+  int BuffNum=2;
+  endStream = 0;
   while(1){
 	  evt = osMessageGet(mid_fs,osWaitForever);
-	  evt = osMessageGet (mid_CMDQueue, osWaitForever); // receive command
 	        if (evt.status == osEventMessage) { // check for valid message
 	        	switch(evt.value.v){
 	        	case PlayAction:
-	        		f = fopen ("Kalimba.wav","r");// open a file on the USB device
+	        		f = fopen (name,"r");// open a file on the USB device
 					if (f != NULL) {
 						fread((void *)&header, sizeof(header), 1, f);
+						UART_send(StartFileData_msg,2);
+						UART_send((char *)(header.overall_size),sizeof((char *)(header.overall_size)));
+						UART_send((char *)(header.sample_rate),sizeof((char *)(header.sample_rate)));
+						UART_send(EndFileData_msg,2);
+
+						rtrn = BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 0x46, header.sample_rate);
+							if (rtrn != AUDIO_OK)return;
+
+						totalCount=fread(&Audio_Buffer[2*i],sizeof(Audio_Buffer),1,f); // Left channel
+						Audio_Buffer[2*i+1] = Audio_Buffer[2*i]; // Right channel
+
+						BSP_AUDIO_OUT_Play((uint16_t *)Audio_Buffer, BUF_LEN*2);
 					}
 
 	        	case ResumeAction:
 	        		if(evt.value.v==ResumeAction){
-
+	        			BSP_AUDIO_OUT_SetMute(AUDIO_MUTE_OFF);
+						BSP_AUDIO_OUT_ChangeBuffer((uint16_t*)Audio_Buffer, BUF_LEN);
+	        		}
+	        		while(totalCount==1){
+	        			osSemaphoreWait(SEM0_ID, osWaitForever);
+						if(BuffNum==2){
+							totalCount = fread(&Audio_Buffer2[2*i],sizeof(Audio_Buffer2),1,f); // Left channel
+							Audio_Buffer2[2*i+1] = Audio_Buffer2[2*i]; // Right channel
+							BuffNum=1;
+							osMessagePut (mid_buffer_queue, Buffer2,osWaitForever);
+							if(totalCount!=1){
+								endStream=1;
+							}
+							}
+						else if(BuffNum==1){
+							totalCount = fread(&Audio_Buffer[2*i],sizeof(Audio_Buffer),1,f); // Left channel
+							Audio_Buffer[2*i+1] = Audio_Buffer[2*i]; // Right channel
+							BuffNum=2;
+							osMessagePut (mid_buffer_queue, Buffer1,osWaitForever);
+							if(totalCount!=1){
+								endStream=1;
+							}
 	        		}
 
 	        		}
