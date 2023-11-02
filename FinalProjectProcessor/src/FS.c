@@ -339,8 +339,9 @@ void FS (void const *argument) {
 	        		if(evt.value.v==ResumeAction){
 	        			BSP_AUDIO_OUT_SetMute(AUDIO_MUTE_OFF);
 						BSP_AUDIO_OUT_ChangeBuffer((uint16_t*)Audio_Buffer, BUF_LEN);
+						endStream=0;
 	        		}
-	        		while(totalCount==1){
+	        		while(endStream!=1){
 	        			osSemaphoreWait(SEM0_ID, osWaitForever);
 						if(BuffNum==2){
 							totalCount = fread(&Audio_Buffer2[2*i],sizeof(Audio_Buffer2),1,f); // Left channel
@@ -359,6 +360,8 @@ void FS (void const *argument) {
 							if(totalCount!=1){
 								endStream=1;
 							}
+						evt = osMessageGet(mid_fs,0);
+
 	        		}
 
 	        		}
@@ -370,27 +373,6 @@ void FS (void const *argument) {
 
 
   }
-  	while(endStream==0){
-  		osSemaphoreWait(SEM0_ID, osWaitForever);
-  		if(BuffNum==2){
-  			totalCount = fread(&Audio_Buffer2[2*i],sizeof(Audio_Buffer2),1,f); // Left channel
-  		  	Audio_Buffer2[2*i+1] = Audio_Buffer2[2*i]; // Right channel
-  			BuffNum=1;
-  			osMessagePut (mid_buffer_queue, Buffer2,osWaitForever);
-  			if(totalCount!=1){
-  				endStream=1;
-  			}
-  			}
-  		else if(BuffNum==1){
-			totalCount = fread(&Audio_Buffer[2*i],sizeof(Audio_Buffer),1,f); // Left channel
-			Audio_Buffer[2*i+1] = Audio_Buffer[2*i]; // Right channel
-  			BuffNum=2;
-  			osMessagePut (mid_buffer_queue, Buffer1,osWaitForever);
-  			if(totalCount!=1){
-  				endStream=1;
-			}
-  		}
-  		}
 
   	}
 
