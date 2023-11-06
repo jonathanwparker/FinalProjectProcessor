@@ -42,7 +42,8 @@ enum Triggers{
   Files_Indexed,
   End_Stream,
   Play_Pressed,
-  Resume_Pressed
+  Resume_Pressed,
+  Pause_Pressed
 
 };
 
@@ -82,9 +83,9 @@ typedef struct WAVHEADER {
 // Receive characters from the VB GUI 
 #define Show_Files_char "1"
 #define Send_File_char "4"
-#define Play_File_char "5"
+#define Stop_File_char "5"
 #define Pause_File_char "6"
-#define Stop_File_char "7"
+#define Resume_File_char "7"
 char *StartFileList_msg = "2\n";
 char *EndFileList_msg = "3\n";
 char *StartFileData_msg = "4\n";
@@ -144,19 +145,32 @@ int Process_Event(uint16_t event){
 		  Current_State = Play;
 		  return PlayAction;
 	  }
-	  else if(event == Resume_Pressed){
-		  return NoAction;
+	  else{
+	      return NoAction;
 	  }
-      return NoAction;
       break;
     case Play:
       if(event==End_Stream){
+    	  Current_State = Idle;
     	  return SongEndAction;
+      }
+      else if(event==Pause_Pressed){
+    	  Current_State = Pause;
+    	  return PauseAction;
+
       }
       else{
     	return NoAction;
       }
-
+      break;
+    case Pause:
+    	if(event==Resume_Pressed){
+    		Current_State=Play;
+    		return ResumeAction;
+    	}
+    	else{
+    		return NoAction;
+    	}
       break;
     default:
       break;
@@ -201,7 +215,7 @@ void Control(void const *arg){
     	  }
     	  else {
     	      action = Process_Event(evt.value.v); // Process event
-    	      if(action==PlayAction){
+    	      if(action==PlayAction||action==PauseAction||action==ResumeAction){
     	    	  osMessagePut(mid_fs,action,osWaitForever);
     	      }
     	  }
@@ -222,6 +236,12 @@ void Rx_Command (void const *argument){
       if(!strcmp(rx_char,Send_File_char)){
     	  UART_receivestring(name,256);
     	  osMessagePut(mid_CMDQueue, Play_Pressed,osWaitForever);
+      }
+      if(!strcmp(rx_char,Pause_File_char)){
+    	  osMessagePut(mid_CMDQueue,Pause_Pressed,osWaitForever);
+      }
+      if(!strcmp(rx_char,Resume_File_char)){
+    	  osMessagePut(mid_CMDQueue,Resume_Pressed,osWaitForever);
       }
    }
 } // end Rx_Command
@@ -340,9 +360,10 @@ void FS (void const *argument) {
 	        		if(evt.value.v==ResumeAction){
 	        			BSP_AUDIO_OUT_SetMute(AUDIO_MUTE_OFF);
 						BSP_AUDIO_OUT_ChangeBuffer((uint16_t*)Audio_Buffer, BUF_LEN);
+						BuffNum=2;
 						endStream=0;
 	        		}
-	        		while(endStream!=1){
+	        		while(endStream==0){
 	        			osSemaphoreWait(SEM0_ID, osWaitForever);
 						if(BuffNum==2){
 							totalCount = fread(&Audio_Buffer2[2*i],sizeof(Audio_Buffer2),1,f); // Left channel
@@ -362,9 +383,16 @@ void FS (void const *argument) {
 								endStream=1;
 							}
 						evt = osMessageGet(mid_fs,0);
+						if (evt.status == osEventMessage) {
+							if(evt.value.v==PauseAction){
+								endStream=2;
+								BSP_AUDIO_OUT_SetMute(AUDIO_MUTE_ON);
+							}
+
+						}
 						if(endStream==1){
 							fclose(f);
-
+							osMessagePut(mid_CMDQueue,End_Stream,osWaitForever);
 						}
 
 	        		}
@@ -386,22 +414,17 @@ void FS (void const *argument) {
 void    BSP_AUDIO_OUT_TransferComplete_CallBack(void){
 	osEvent evt; // Receive message object
 	evt = osMessageGet (mid_buffer_queue,0); // receive command
-	if(endStream==0){
-	      if (evt.status == osEventMessage) { // check for valid message
-	      if(evt.value.v==Buffer1)
-	      {
-	    		BSP_AUDIO_OUT_ChangeBuffer((uint16_t*)Audio_Buffer, BUF_LEN);
-	    		osSemaphoreRelease(SEM0_ID);
-	      }
-	      else
-	      {
-	    		BSP_AUDIO_OUT_ChangeBuffer((uint16_t*)Audio_Buffer2, BUF_LEN);
-	    		osSemaphoreRelease(SEM0_ID);
-	      }
-	    }
-	}
-	else{
-		BSP_AUDIO_OUT_SetMute(AUDIO_MUTE_ON);
+  if (evt.status == osEventMessage) { // check for valid message
+	  if(evt.value.v==Buffer1)
+	  {
+			BSP_AUDIO_OUT_ChangeBuffer((uint16_t*)Audio_Buffer, BUF_LEN);
+			osSemaphoreRelease(SEM0_ID);
+	  }
+	  else
+	  {
+			BSP_AUDIO_OUT_ChangeBuffer((uint16_t*)Audio_Buffer2, BUF_LEN);
+			osSemaphoreRelease(SEM0_ID);
+	  }
 	}
 
 }
