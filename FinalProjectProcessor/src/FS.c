@@ -43,7 +43,8 @@ enum Triggers{
   End_Stream,
   Play_Pressed,
   Resume_Pressed,
-  Pause_Pressed
+  Pause_Pressed,
+  Stop_Pressed
 
 };
 
@@ -59,7 +60,7 @@ enum Actions{
 	PlayAction,
 	PauseAction,
 	ResumeAction,
-	SongEndAction
+	StopAction
 
 };
 
@@ -150,9 +151,9 @@ int Process_Event(uint16_t event){
 	  }
       break;
     case Play:
-      if(event==End_Stream){
+      if(event==Stop_Pressed){
     	  Current_State = Idle;
-    	  return SongEndAction;
+    	  return StopAction;
       }
       else if(event==Pause_Pressed){
     	  Current_State = Pause;
@@ -167,6 +168,10 @@ int Process_Event(uint16_t event){
     	if(event==Resume_Pressed){
     		Current_State=Play;
     		return ResumeAction;
+    	}
+    	else if(event==Stop_Pressed){
+    		Current_State=Idle;
+    		return StopAction;
     	}
     	else{
     		return NoAction;
@@ -215,7 +220,7 @@ void Control(void const *arg){
     	  }
     	  else {
     	      action = Process_Event(evt.value.v); // Process event
-    	      if(action==PlayAction||action==PauseAction||action==ResumeAction){
+    	      if(action==PlayAction||action==PauseAction||action==ResumeAction||action==StopAction){
     	    	  osMessagePut(mid_fs,action,osWaitForever);
     	      }
     	  }
@@ -242,6 +247,9 @@ void Rx_Command (void const *argument){
       }
       if(!strcmp(rx_char,Resume_File_char)){
     	  osMessagePut(mid_CMDQueue,Resume_Pressed,osWaitForever);
+      }
+      if(!strcmp(rx_char,Stop_File_char)){
+    	  osMessagePut(mid_CMDQueue,Stop_Pressed,osWaitForever);
       }
    }
 } // end Rx_Command
@@ -344,10 +352,10 @@ void FS (void const *argument) {
 	        		uint32_t test = 111;
 					if (f != NULL) {
 						fread((void *)&header, sizeof(header), 1, f);
+						endStream=0;
 //						snprintf(length, sizeof length, "%lu", (unsigned long)header.overall_size);
 //						snprintf(samRate, sizeof samRate, "%lu", (unsigned long)header.sample_rate);
 						UART_send(StartFileData_msg,2);
-						UART_send((char *)(&test),4);
 						UART_send((char *)(&header.overall_size),sizeof((char *)(header.overall_size)));
 						UART_send((char *)(&header.sample_rate),sizeof((char *)(header.sample_rate)));
 						UART_send(EndFileData_msg,2);
@@ -360,6 +368,7 @@ void FS (void const *argument) {
 						Audio_Buffer[2*i+1] = Audio_Buffer[2*i]; // Right channel
 
 						BSP_AUDIO_OUT_Play((uint16_t *)Audio_Buffer, BUF_LEN*2);
+						BSP_AUDIO_OUT_SetMute(AUDIO_MUTE_OFF);
 					}
 
 	        	case ResumeAction:
@@ -368,6 +377,9 @@ void FS (void const *argument) {
 						BSP_AUDIO_OUT_ChangeBuffer((uint16_t*)Audio_Buffer, BUF_LEN);
 						BuffNum=2;
 						endStream=0;
+	        		}
+	        		else if(evt.value.v==StopAction){
+	        			fclose(f);
 	        		}
 	        		while(endStream==0){
 	        			osSemaphoreWait(SEM0_ID, osWaitForever);
@@ -394,11 +406,13 @@ void FS (void const *argument) {
 								endStream=2;
 								BSP_AUDIO_OUT_SetMute(AUDIO_MUTE_ON);
 							}
+							else if(evt.value.v==StopAction){
+								endStream=1;
+							}
 
 						}
 						if(endStream==1){
 							fclose(f);
-							osMessagePut(mid_CMDQueue,End_Stream,osWaitForever);
 							BSP_AUDIO_OUT_SetMute(AUDIO_MUTE_ON);
 						}
 
