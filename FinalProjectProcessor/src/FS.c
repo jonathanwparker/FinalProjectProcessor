@@ -275,6 +275,8 @@ void FS (void const *argument) {
 			osEvent evt;
 
 			uint32_t Fs = 44100.0; // sample frequency
+			char* length[15];
+			char* samRate[15];
 
 
 			static FILE *f;
@@ -339,12 +341,16 @@ void FS (void const *argument) {
 	        	switch(evt.value.v){
 	        	case PlayAction:
 	        		f = fopen (name,"r");// open a file on the USB device
+	        		uint32_t test = 111;
 					if (f != NULL) {
 						fread((void *)&header, sizeof(header), 1, f);
-//						UART_send(StartFileData_msg,2);
-//						UART_send((char *)(header.overall_size),sizeof((char *)(header.overall_size)));
-//						UART_send((char *)(header.sample_rate),sizeof((char *)(header.sample_rate)));
-//						UART_send(EndFileData_msg,2);
+//						snprintf(length, sizeof length, "%lu", (unsigned long)header.overall_size);
+//						snprintf(samRate, sizeof samRate, "%lu", (unsigned long)header.sample_rate);
+						UART_send(StartFileData_msg,2);
+						UART_send((char *)(&test),4);
+						UART_send((char *)(&header.overall_size),sizeof((char *)(header.overall_size)));
+						UART_send((char *)(&header.sample_rate),sizeof((char *)(header.sample_rate)));
+						UART_send(EndFileData_msg,2);
 
 						BSP_AUDIO_OUT_Stop(CODEC_PDWN_HW);
 						rtrn = BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 0x46, header.sample_rate);
@@ -393,6 +399,7 @@ void FS (void const *argument) {
 						if(endStream==1){
 							fclose(f);
 							osMessagePut(mid_CMDQueue,End_Stream,osWaitForever);
+							BSP_AUDIO_OUT_SetMute(AUDIO_MUTE_ON);
 						}
 
 	        		}
