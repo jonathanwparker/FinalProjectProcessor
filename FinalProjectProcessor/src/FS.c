@@ -349,15 +349,15 @@ void FS (void const *argument) {
 	        	switch(evt.value.v){
 	        	case PlayAction:
 	        		f = fopen (name,"r");// open a file on the USB device
-	        		uint32_t test = 111;
+	        		uint32_t sec;
 					if (f != NULL) {
 						fread((void *)&header, sizeof(header), 1, f);
 						endStream=0;
 //						snprintf(length, sizeof length, "%lu", (unsigned long)header.overall_size);
 //						snprintf(samRate, sizeof samRate, "%lu", (unsigned long)header.sample_rate);
 						UART_send(StartFileData_msg,2);
-						UART_send((char *)(&header.overall_size),sizeof((char *)(header.overall_size)));
-						UART_send((char *)(&header.sample_rate),sizeof((char *)(header.sample_rate)));
+						UART_send((char *)(&header.overall_size),sizeof((char *)(&header.overall_size)));
+						UART_send((char *)(&header.sample_rate),sizeof((char *)(&header.sample_rate)));
 						UART_send(EndFileData_msg,2);
 
 						BSP_AUDIO_OUT_Stop(CODEC_PDWN_HW);
