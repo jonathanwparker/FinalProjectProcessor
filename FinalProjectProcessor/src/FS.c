@@ -447,11 +447,13 @@ void    BSP_AUDIO_OUT_TransferComplete_CallBack(void){
 			osSemaphoreRelease(SEM0_ID);
 	  }
 	}
+  UART_send(Slide_num,2);
 
 }
 
 /* This function is called when half of the requested buffer has been transferred. */
 void    BSP_AUDIO_OUT_HalfTransfer_CallBack(void){
+	UART_send(Slide_num,2);
 
 }
 
